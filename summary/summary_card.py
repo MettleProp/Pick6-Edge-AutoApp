@@ -26,3 +26,51 @@ def render_summary_card(player_name, index):
         "tags": tags,
         "override": override_score
     }
+    def render_summary_result_card(summary):
+    st.markdown("---")
+    st.markdown(f"### {summary['player']}")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(f"**Stat Type:** {summary.get('stat_type', '—')}")
+        st.markdown(f"**Line:** {summary.get('line', '—')}")
+        st.markdown(f"**Projection:** {summary.get('projection', '—')}")
+        st.markdown(f"**Edge:** {summary.get('edge', '—')}")
+        st.markdown(f"**Confidence Score:** {summary.get('override', '—') if summary.get('override', 0) > 0 else 'Auto'}")
+
+    with col2:
+        st.markdown("**Tags:**")
+        if summary.get("tags"):
+            for tag in summary["tags"]:
+                st.markdown(f"- {tag}")
+        else:
+            st.markdown("*No tags applied*")
+
+    if summary.get("trend_img"):
+        st.image(summary["trend_img"], caption="Trend Screenshot", width=250)
+    if summary.get("notes_img"):
+        st.image(summary["notes_img"], caption="Notes Screenshot", width=250)
+       def render_summary_result_card(summary):
+    st.markdown("---")
+    st.markdown(f"### {summary['player']}")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(f"**Stat Type:** {summary.get('stat_type', '—')}")
+        st.markdown(f"**Line:** {summary.get('line', '—')}")
+        st.markdown(f"**Projection:** {summary.get('projection', '—')}")
+        st.markdown(f"**Edge:** {summary.get('edge', '—')}")
+        st.markdown(f"**Confidence Score:** {summary.get('override', '—') if summary.get('override', 0) > 0 else 'Auto'}")
+
+    with col2:
+        st.markdown("**Tags:**")
+        if summary.get("tags"):
+            for tag in summary["tags"]:
+                st.markdown(f"- {tag}")
+        else:
+            st.markdown("*No tags applied*")
+
+    if summary.get("trend_img"):
+        st.image(summary["trend_img"], caption="Trend Screenshot", width=250)
+    if summary.get("notes_img"):
+        st.image(summary["notes_img"], caption="Notes Screenshot", width=250) 
