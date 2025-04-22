@@ -1,12 +1,12 @@
 def filter_valid_props(df):
-    # Base filtering: non-null lines, projections, and Pick6 only
+    # Base filtering
     df = df[
         (df["Line"].notnull()) &
         (df["RotoWire Projection"].notnull()) &
         (df["Site"].str.lower() == "pick6")
     ].copy()
 
-    # Stat-type-based projection sanity checks
+    # Stat-type-specific expected ranges
     valid_ranges = {
         "Hits+Runs+RBI": (0.5, 3.5),
         "Total Bases": (0.5, 4.0),
@@ -22,14 +22,14 @@ def filter_valid_props(df):
         "PA": (5, 40)
     }
 
-    def is_within_range(row):
+    def is_valid(row):
         stat = row["Stat Type"]
+        line = row["Line"]
         proj = row["RotoWire Projection"]
         if stat in valid_ranges:
             lo, hi = valid_ranges[stat]
-            return lo <= proj <= hi
-        return True  # pass through if stat type isn't defined
+            return lo <= line <= hi and lo <= proj <= hi
+        return True
 
-    df = df[df.apply(is_within_range, axis=1)].copy()
-
+    df = df[df.apply(is_valid, axis=1)].copy()
     return df
