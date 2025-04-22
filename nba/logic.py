@@ -8,15 +8,19 @@ from summary.summary_card import render_summary_card
 
 def run_nba_pick6(files=None):
     st.header("NBA Pick6 Analysis")
+    
     if files is None:
         files = st.file_uploader("Upload 6 NBA stat category CSVs", type="csv", accept_multiple_files=True)
+
     if files and len(files) == 6:
         stat_types = ["PTS", "REB", "AST", "PRA", "PR", "PA"]
         dfs = []
+
         for file, stat in zip(files, stat_types):
             df = pd.read_csv(file)
             df["Stat Type"] = stat
             dfs.append(df)
+
         df = pd.concat(dfs, ignore_index=True)
         valid = filter_valid_props(df)
         scored = calculate_edge(valid)
@@ -36,12 +40,6 @@ def run_nba_pick6(files=None):
             summary_outputs.append(summary)
 
         st.session_state["summary_cards"] = summary_outputs
+
     else:
         st.warning("Please upload all 6 stat types: PTS, REB, AST, PRA, PR, PA.")
-✅ Then Push It:
-bash
-Copy
-Edit
-git add nba/logic.py
-git commit -m "Add summary card upload logic to NBA Pick6"
-git push origin main
