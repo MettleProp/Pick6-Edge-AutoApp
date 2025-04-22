@@ -4,6 +4,7 @@ from utils.edge_calculator import calculate_edge
 from utils.prop_filters import filter_valid_props
 from utils.initial_10_filter import get_initial_10
 from utils.tdbu_engine import compute_tdbu_score
+from summary.summary_card import render_summary_card
 
 def run_nba_pick6(files=None):
     st.header("NBA Pick6 Analysis")
@@ -27,5 +28,20 @@ def run_nba_pick6(files=None):
         st.subheader("Initial 10 Finalists")
         initial10 = get_initial_10(tdbu_ranked)
         st.dataframe(initial10[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
+
+        st.subheader("Upload Prop.cash Screenshots and Apply Tags")
+        summary_outputs = []
+        for idx, row in initial10.iterrows():
+            summary = render_summary_card(row["Player"], idx)
+            summary_outputs.append(summary)
+
+        st.session_state["summary_cards"] = summary_outputs
     else:
         st.warning("Please upload all 6 stat types: PTS, REB, AST, PRA, PR, PA.")
+✅ Then Push It:
+bash
+Copy
+Edit
+git add nba/logic.py
+git commit -m "Add summary card upload logic to NBA Pick6"
+git push origin main
