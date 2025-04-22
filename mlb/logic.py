@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from utils.unified_extractor import extract_and_normalize_props
 from utils.edge_calculator import calculate_edge
 from utils.prop_filters import filter_valid_props
 from utils.initial_10_filter import get_initial_10
@@ -8,27 +9,34 @@ from summary.summary_card import render_summary_card
 
 def run_mlb_pick6(files=None):
     st.header("MLB Pick6 Analysis")
+
     if files is None:
-        files = st.file_uploader("Upload 6 MLB stat category CSVs", type="csv", accept_multiple_files=True)
+        files = st.file_uploader("Upload 6 RotoWire CSV slices", type="csv", accept_multiple_files=True)
+
     if files and len(files) == 6:
-        stat_types = ["Hits+Runs+RBI", "Total Bases", "Strikeouts", "Outs Recorded", "Earned Runs", "Walks"]
-        dfs = []
-        for file, stat in zip(files, stat_types):
-            df = pd.read_csv(file)
-            df["Stat Type"] = stat
-            dfs.append(df)
-        df = pd.concat(dfs, ignore_index=True)
+        # Step 1: Combine all uploaded files and normalize stat types
+        df = extract_and_normalize_props(files)
+
+        # Step 2: Filter clean props
         valid = filter_valid_props(df)
+
+        # Step 3: Score all props
         scored = calculate_edge(valid)
         tdbu_ranked = compute_tdbu_score(scored)
 
-        st.subheader("Top 20 MLB Props (TDBU Scored)")
-        st.dataframe(tdbu_ranked.head(20)[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]])
+        # Step 4: Pick best prop per player
+        best_per_player = tdbu_ranked.sort_values(by=["Confidence Score", "Abs Edge"], ascending=False).drop_duplicates(subset=["Player"])
 
+        st.subheader("Top 20 MLB Props (Best per Player, TDBU Scored)")
+        top20 = best_per_player.head(20).reset_index(drop=True)
+        st.dataframe(top20[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]])
+
+        # Step 5: Initial 10
         st.subheader("Initial 10 Finalists")
-        initial10 = get_initial_10(tdbu_ranked)
+        initial10 = get_initial_10(top20)
         st.dataframe(initial10[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
 
+        # Step 6: Prop.cash upload + tagging
         st.subheader("Upload Prop.cash Screenshots and Apply Tags")
         summary_outputs = []
         for idx, row in initial10.iterrows():
@@ -36,5 +44,6 @@ def run_mlb_pick6(files=None):
             summary_outputs.append(summary)
 
         st.session_state["summary_cards"] = summary_outputs
+
     else:
-        st.warning("Please upload all 6 stat types: H+R+RBI, TB, Strikeouts, Outs, ER, Walks.")
+        st.warning("Please upload 6 RotoWire CSVs for MLB from today’s slate.")
