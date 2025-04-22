@@ -47,3 +47,7 @@ def run_mlb_pick6(files=None):
 
     else:
         st.warning("Please upload 6 RotoWire CSVs for MLB from today’s slate.")
+     # Step 7: Show final OG-style Prop Summary Cards
+    st.subheader("Final Summary Cards")
+    for summary in st.session_state.get("summary_cards", []):
+        render_summary_result_card(summary)   
