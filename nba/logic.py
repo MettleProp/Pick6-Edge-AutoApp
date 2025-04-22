@@ -1,8 +1,8 @@
-
 import streamlit as st
 import pandas as pd
 from utils.edge_calculator import calculate_edge
 from utils.prop_filters import filter_valid_props
+from utils.initial_10_filter import get_initial_10
 
 def run_nba_pick6(files=None):
     st.header("NBA Pick6 Analysis")
@@ -18,8 +18,13 @@ def run_nba_pick6(files=None):
         df = pd.concat(dfs, ignore_index=True)
         valid = filter_valid_props(df)
         scored = calculate_edge(valid)
-        top = scored.sort_values(by="Abs Edge", ascending=False).head(20)
-        st.subheader("Top 20 NBA Props")
-        st.dataframe(top[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
+
+        st.subheader("Top 20 NBA Props by Edge")
+        top20 = scored.sort_values(by="Abs Edge", ascending=False).head(20).reset_index(drop=True)
+        st.dataframe(top20[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
+
+        st.subheader("Initial 10 Candidates")
+        initial10 = get_initial_10(top20)
+        st.dataframe(initial10[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
     else:
         st.warning("Please upload all 6 stat types: PTS, REB, AST, PRA, PR, PA.")
