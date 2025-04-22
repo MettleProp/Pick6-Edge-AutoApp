@@ -1,8 +1,6 @@
 import streamlit as st
 
-# ========== Card Builder ==========
-
-def render_summary_card(player_name, index):
+def render_summary_card(player_name, index, row):
     st.markdown(f"### {index+1}. {player_name}")
 
     col1, col2 = st.columns(2)
@@ -26,10 +24,12 @@ def render_summary_card(player_name, index):
         "trend_img": shot1,
         "notes_img": shot2,
         "tags": tags,
-        "override": override_score
+        "override": override_score,
+        "stat_type": row["Stat Type"],
+        "line": row["Line"],
+        "projection": row["RotoWire Projection"],
+        "edge": row["Edge"]
     }
-
-# ========== Final Summary Card Display ==========
 
 def render_summary_result_card(summary):
     st.markdown("---")
