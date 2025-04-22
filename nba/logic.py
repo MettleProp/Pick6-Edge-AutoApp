@@ -5,7 +5,8 @@ from utils.edge_calculator import calculate_edge
 from utils.prop_filters import filter_valid_props
 from utils.initial_10_filter import get_initial_10
 from utils.tdbu_engine import compute_tdbu_score
-from summary.summary_card import render_summary_card
+from summary.summary_card import render_summary_card, render_summary_result_card
+
 
 def run_nba_pick6(files=None):
     st.header("NBA Pick6 Analysis")
@@ -47,3 +48,9 @@ def run_nba_pick6(files=None):
 
     else:
         st.warning("Please upload 6 RotoWire prop CSVs from today’s slate.")
+     # Step 7: Show final OG-style Prop Summary Cards
+        st.subheader("Final Summary Cards")
+        for summary in st.session_state.get("summary_cards", []):
+            render_summary_result_card(summary)
+     st.write("DEBUG:", st.session_state.get("summary_cards", []))
+   
