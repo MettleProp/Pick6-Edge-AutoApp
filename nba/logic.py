@@ -9,7 +9,7 @@ from utils.initial_10_filter import get_initial_10
 from utils.tdbu_engine import compute_tdbu_score
 
 # Summary card display
-from summary_card import render_summary_card, render_summary_result_card
+from summary.summary_card import render_summary_card, render_summary_result_card
 
 
 def run_nba_pick6(files=None):
