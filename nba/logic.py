@@ -13,12 +13,13 @@ def run_nba_pick6(files=None):
         files = st.file_uploader("Upload 6 NBA stat category CSVs", type="csv", accept_multiple_files=True)
 
     if files and len(files) == 6:
-        stat_types = ["PTS", "REB", "AST", "PRA", "PR", "PA"]
+        fallback_stats = ["PTS", "REB", "AST", "PRA", "PR", "PA"]
         dfs = []
 
-        for file, stat in zip(files, stat_types):
+        for file, stat in zip(files, fallback_stats):
             df = pd.read_csv(file)
-            df["Stat Type"] = stat
+            if "Stat Type" not in df.columns:
+                df["Stat Type"] = stat  # fallback if not already labeled
             dfs.append(df)
 
         df = pd.concat(dfs, ignore_index=True)
@@ -42,4 +43,4 @@ def run_nba_pick6(files=None):
         st.session_state["summary_cards"] = summary_outputs
 
     else:
-        st.warning("Please upload all 6 stat types: PTS, REB, AST, PRA, PR, PA.")
+        st.warning("Please upload all 6 stat-type CSVs: PTS, REB, AST, PRA, PR, PA.")
