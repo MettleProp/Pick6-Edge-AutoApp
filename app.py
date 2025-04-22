@@ -3,6 +3,7 @@ from nba.logic import run_nba_pick6
 from mlb.logic import run_mlb_pick6
 from dfs.logic import run_dfs
 
+
 def detect_sport_from_files(files):
     """
     Determine whether the uploaded stat files correspond to NBA or MLB by scanning filenames and content.
