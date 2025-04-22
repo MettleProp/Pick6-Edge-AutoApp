@@ -3,6 +3,7 @@ import pandas as pd
 from utils.edge_calculator import calculate_edge
 from utils.prop_filters import filter_valid_props
 from utils.initial_10_filter import get_initial_10
+from utils.tdbu_engine import compute_tdbu_score
 
 def run_mlb_pick6(files=None):
     st.header("MLB Pick6 Analysis")
@@ -18,14 +19,13 @@ def run_mlb_pick6(files=None):
         df = pd.concat(dfs, ignore_index=True)
         valid = filter_valid_props(df)
         scored = calculate_edge(valid)
+        tdbu_ranked = compute_tdbu_score(scored)
 
-        st.subheader("Top 20 MLB Props by Edge")
-        top20 = scored.sort_values(by="Abs Edge", ascending=False).head(20).reset_index(drop=True)
-        st.dataframe(top20[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
+        st.subheader("Top 20 MLB Props (TDBU Scored)")
+        st.dataframe(tdbu_ranked.head(20)[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]])
 
-        st.subheader("Initial 10 Candidates")
-        initial10 = get_initial_10(top20)
+        st.subheader("Initial 10 Finalists")
+        initial10 = get_initial_10(tdbu_ranked)
         st.dataframe(initial10[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
     else:
         st.warning("Please upload all 6 stat types: H+R+RBI, TB, Strikeouts, Outs, ER, Walks.")
-
