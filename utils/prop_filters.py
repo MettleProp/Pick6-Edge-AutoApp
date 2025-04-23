@@ -23,7 +23,7 @@ def filter_valid_props(df):
     }
 
     def is_valid(row):
-        stat = row["Stat Type"]
+        stat = row.get("Stat Type") or row.get("Stat") or ""
         line = row["Line"]
         proj = row["RotoWire Projection"]
         if stat in valid_ranges:
