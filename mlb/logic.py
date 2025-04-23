@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 
@@ -52,7 +53,13 @@ def run_mlb_pick6(files=None):
         verdicts = assign_verdicts(summary_outputs)
 
         st.subheader("Core 5 + 1 Verdicts")
-        verdict_df = pd.DataFrame(verdicts)[["player", "stat_type", "line", "projection", "edge", "score", "verdict"]]
+        verdict_df_raw = pd.DataFrame(verdicts)
+        st.write("Verdict Columns:", list(verdict_df_raw.columns))
+
+        expected_cols = ["player", "stat_type", "line", "projection", "edge", "score", "verdict"]
+        available_cols = [col for col in expected_cols if col in verdict_df_raw.columns]
+
+        verdict_df = verdict_df_raw[available_cols]
         st.dataframe(verdict_df)
 
         # Combo Builder
