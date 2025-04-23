@@ -7,6 +7,7 @@ from utils.prop_filters import filter_valid_props
 from utils.initial_10_filter import get_initial_10
 from utils.tdbu_engine import compute_tdbu_score
 from utils.core_verdict_engine import assign_verdicts
+from utils.combo_builder import build_combos
 
 from summary.summary_card import render_summary_card, render_summary_result_card
 
@@ -36,15 +37,15 @@ def run_mlb_pick6(files=None):
 
         st.subheader("Prop.cash Screenshots and Apply Tags")
         summary_outputs = []
-
         for idx, row in initial10.iterrows():
             summary = render_summary_card(row["Player"], idx, row)
+            summary["team"] = row["Team"]
             summary_outputs.append(summary)
 
         st.session_state["summary_cards"] = summary_outputs
 
         st.subheader("Final Summary Cards")
-        for summary in st.session_state.get("summary_cards", []):
+        for summary in summary_outputs:
             render_summary_result_card(summary)
 
         # Core 5 + 1 Verdicts
@@ -52,7 +53,23 @@ def run_mlb_pick6(files=None):
 
         st.subheader("Core 5 + 1 Verdicts")
         verdict_df = pd.DataFrame(verdicts)[["player", "stat_type", "line", "projection", "edge", "score", "verdict"]]
-        st.dataframe(verdict_df.style.highlight_max(axis=0))
+        st.dataframe(verdict_df)
+
+        # Combo Builder
+        pick2_combos, pick6_entry = build_combos(verdicts)
+
+        st.subheader("Top 10 Pick2 Combos")
+        combo_df = pd.DataFrame(pick2_combos)
+        st.dataframe(combo_df[["Player 1", "Player 2", "Avg Score", "Tags", "Verdict"]])
+
+        st.subheader("Recommended Pick6 Combo")
+        st.write("Players:", pick6_entry["Players"])
+        st.write("Avg Score:", pick6_entry["Avg Score"])
+        st.write("Total Edge:", pick6_entry["Total Edge"])
+        if pick6_entry["Flagged"]:
+            st.warning("One or more players in this Pick6 has 'Volatile' or 'Distorted' tags.")
+        else:
+            st.success("Pick6 combo passes tag check.")
 
     else:
         st.warning("Please upload 6 RotoWire prop CSVs for MLB from today’s slate.")
