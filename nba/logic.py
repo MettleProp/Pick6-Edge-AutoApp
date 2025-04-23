@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 
@@ -22,13 +23,19 @@ def run_nba_pick6(files=None):
         all_props = extract_and_normalize_props(files)
         valid = filter_valid_props(all_props)
         scored = calculate_edge(valid)
-        tdbu_ranked = compute_tdbu_score(scored)
+        tdbu_ranked = compute_tdbu_score(scored, sport="NBA")
 
         best_per_player = tdbu_ranked.sort_values(by=["Confidence Score", "Abs Edge"], ascending=False).drop_duplicates(subset=["Player"])
         top20 = best_per_player.head(20).reset_index(drop=True)
 
         st.subheader("Top 20 Props (Best per Player, TDBU Scored)")
-        st.dataframe(top20[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]])
+
+        # Debug actual columns
+        st.write("Top20 Columns:", list(top20.columns))
+
+        expected_cols = ["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]
+        available_cols = [col for col in expected_cols if col in top20.columns]
+        st.dataframe(top20[available_cols])
 
         initial10 = get_initial_10(top20)
 
@@ -39,7 +46,7 @@ def run_nba_pick6(files=None):
         summary_outputs = []
         for idx, row in initial10.iterrows():
             summary = render_summary_card(row["Player"], idx, row)
-            summary["team"] = row["Team"]  # for same-team detection
+            summary["team"] = row["Team"]
             summary_outputs.append(summary)
 
         st.session_state["summary_cards"] = summary_outputs
