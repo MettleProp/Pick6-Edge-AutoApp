@@ -30,9 +30,8 @@ def run_nba_pick6(files=None):
 
         st.subheader("Top 20 Props (Best per Player, TDBU Scored)")
 
-        # Debug actual columns
+        # Safe display with debug column listing
         st.write("Top20 Columns:", list(top20.columns))
-
         expected_cols = ["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]
         available_cols = [col for col in expected_cols if col in top20.columns]
         st.dataframe(top20[available_cols])
@@ -59,7 +58,15 @@ def run_nba_pick6(files=None):
         verdicts = assign_verdicts(summary_outputs)
 
         st.subheader("Core 5 + 1 Verdicts")
-        verdict_df = pd.DataFrame(verdicts)[["player", "stat_type", "line", "projection", "edge", "score", "verdict"]]
+
+        # Safe verdict display
+        verdict_df_raw = pd.DataFrame(verdicts)
+        st.write("Verdict Columns:", list(verdict_df_raw.columns))
+
+        expected_verdict_cols = ["player", "stat_type", "line", "projection", "edge", "score", "verdict"]
+        available_verdict_cols = [col for col in expected_verdict_cols if col in verdict_df_raw.columns]
+        verdict_df = verdict_df_raw[available_verdict_cols]
+
         st.dataframe(verdict_df)
 
         # Combo Builder
