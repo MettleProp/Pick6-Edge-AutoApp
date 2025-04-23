@@ -29,4 +29,11 @@ def generate_auto_tags(row):
     if 0 < edge < 0.7:
         tags.append("Narrow Misses")
 
+    # NEW: Hit rate tags
+    if row.get("Weighted Hit Rate", 0) >= 65:
+        tags.append("High Hit Rate")
+
+    if row.get("Hit Rate Factor", 0) <= -30:
+        tags.append("Cold")
+
     return tags
