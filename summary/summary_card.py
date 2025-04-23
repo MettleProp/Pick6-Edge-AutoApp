@@ -1,10 +1,11 @@
+
 import streamlit as st
 from utils.auto_tagger import generate_auto_tags
 
 def render_summary_card(player_name, index, row):
     st.markdown(f"### {index+1}. {player_name}")
 
-    # Auto-generate tags based on row data
+    # Auto-generate tags from row data
     auto_tags = generate_auto_tags(row)
 
     col1, col2 = st.columns(2)
@@ -21,17 +22,27 @@ def render_summary_card(player_name, index, row):
             key=f"{player_name}_notes"
         )
 
+    # List of all supported tags
+    valid_tags = [
+        "Volatile", "Distorted", "Role Up", "Role Down", "Playoff Motivation",
+        "Streaking", "Line Moved ↑", "Narrow Misses",
+        "Multi-Stat Core", "Low Confidence", "Projection Trap", "Sharp",
+        "High Hit Rate", "Cold"
+    ]
+
+    # Filter auto-tags so only supported values are passed as defaults
+    safe_defaults = [tag for tag in auto_tags if tag in valid_tags]
+
     tags = st.multiselect(
         f"Tags for {player_name}",
-        ["Volatile", "Distorted", "Role Up", "Role Down", "Playoff Motivation", "Streaking", "Line Moved ↑", "Narrow Misses"],
-        default=auto_tags,
+        options=valid_tags,
+        default=safe_defaults,
         key=f"{player_name}_tags"
     )
 
     override_score = st.slider(
         f"Confidence Override for {player_name} (Optional)",
-        1, 10, value=0,
-        key=f"{player_name}_override"
+        1, 10, value=0, key=f"{player_name}_override"
     )
 
     return {
