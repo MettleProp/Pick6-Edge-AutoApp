@@ -1,16 +1,19 @@
-import pandas as pd
-
 def get_initial_10(df):
-    # Filter to one prop per player (highest Abs Edge)
-    deduped = df.sort_values(by="Abs Edge", ascending=False).drop_duplicates(subset=["Player"])
+    import pandas as pd
 
-    # Filter to valid stat types only (can be adjusted per sport)
-    valid_stats = ["PTS", "REB", "AST", "PRA", "PR", "PA", "Hits+Runs+RBI", "Total Bases", "Strikeouts", "Outs Recorded", "Earned Runs", "Walks"]
-    print("Columns in deduped:", list(deduped.columns))
+    valid_stats = ["PRA", "PR", "PTS+AST", "PTS+REB", "PTS", "REB", "AST", "Fantasy", "Strikeouts", "Outs"]
+
+    deduped = df.drop_duplicates(subset=["Player", "Stat Type"])
+
+    # Safety fallback in case 'Stat Type' is missing
     if "Stat Type" not in deduped.columns:
-    deduped["Stat Type"] = ""  # fallback to empty if missing
+        deduped["Stat Type"] = ""
 
-filtered = deduped[deduped["Stat Type"].isin(valid_stats)]
+    filtered = deduped[deduped["Stat Type"].isin(valid_stats)]
 
-    # Return top 10 props
-    return filtered.head(10).reset_index(drop=True)
+    # Tiebreaker by best edge
+    sorted_df = filtered.sort_values(by=["Player", "Edge"], ascending=[True, False])
+
+    best_per_player = sorted_df.drop_duplicates(subset=["Player"])
+
+    return best_per_player.reset_index(drop=True)
