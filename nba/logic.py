@@ -30,8 +30,7 @@ def run_nba_pick6(files=None):
 
         st.subheader("Top 20 Props (Best per Player, TDBU Scored)")
 
-        # Safe display with debug column listing
-        st.write("Top20 Columns:", list(top20.columns))
+        st.write("Top20 Columns:", list(top20.columns))  # Debug
         expected_cols = ["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]
         available_cols = [col for col in expected_cols if col in top20.columns]
         st.dataframe(top20[available_cols])
@@ -39,6 +38,9 @@ def run_nba_pick6(files=None):
         initial10 = get_initial_10(top20)
 
         st.subheader("Initial 10 Finalists")
+        if initial10.empty:
+            st.warning("Initial 10 is empty. No props passed filters. Try another slate or adjust filters.")
+            return
         st.dataframe(initial10[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
 
         st.subheader("Prop.cash Screenshots and Apply Tags")
@@ -58,15 +60,12 @@ def run_nba_pick6(files=None):
         verdicts = assign_verdicts(summary_outputs)
 
         st.subheader("Core 5 + 1 Verdicts")
-
-        # Safe verdict display
         verdict_df_raw = pd.DataFrame(verdicts)
         st.write("Verdict Columns:", list(verdict_df_raw.columns))
 
         expected_verdict_cols = ["player", "stat_type", "line", "projection", "edge", "score", "verdict"]
         available_verdict_cols = [col for col in expected_verdict_cols if col in verdict_df_raw.columns]
         verdict_df = verdict_df_raw[available_verdict_cols]
-
         st.dataframe(verdict_df)
 
         # Combo Builder
@@ -74,7 +73,10 @@ def run_nba_pick6(files=None):
 
         st.subheader("Top 10 Pick2 Combos")
         combo_df = pd.DataFrame(pick2_combos)
-        st.dataframe(combo_df[["Player 1", "Player 2", "Avg Score", "Tags", "Verdict"]])
+        if combo_df.empty or not all(col in combo_df.columns for col in ["Player 1", "Player 2", "Avg Score", "Tags", "Verdict"]):
+            st.warning("No valid Pick2 combos available.")
+        else:
+            st.dataframe(combo_df[["Player 1", "Player 2", "Avg Score", "Tags", "Verdict"]])
 
         st.subheader("Recommended Pick6 Combo")
         st.write("Players:", pick6_entry["Players"])
