@@ -22,7 +22,7 @@ def run_mlb_pick6(files=None):
         all_props = extract_and_normalize_props(files)
         valid = filter_valid_props(all_props)
         scored = calculate_edge(valid)
-        tdbu_ranked = compute_tdbu_score(scored)
+        tdbu_ranked = compute_tdbu_score(scored, sport="MLB")
 
         best_per_player = tdbu_ranked.sort_values(by=["Confidence Score", "Abs Edge"], ascending=False).drop_duplicates(subset=["Player"])
         top20 = best_per_player.head(20).reset_index(drop=True)
