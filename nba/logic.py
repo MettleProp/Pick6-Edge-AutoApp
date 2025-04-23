@@ -6,6 +6,7 @@ from utils.edge_calculator import calculate_edge
 from utils.prop_filters import filter_valid_props
 from utils.initial_10_filter import get_initial_10
 from utils.tdbu_engine import compute_tdbu_score
+from utils.core_verdict_engine import assign_verdicts
 
 from summary.summary_card import render_summary_card, render_summary_result_card
 
@@ -34,8 +35,8 @@ def run_nba_pick6(files=None):
         st.dataframe(initial10[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
 
         st.subheader("Prop.cash Screenshots and Apply Tags")
-
         summary_outputs = []
+
         for idx, row in initial10.iterrows():
             summary = render_summary_card(row["Player"], idx, row)
             summary_outputs.append(summary)
@@ -45,6 +46,13 @@ def run_nba_pick6(files=None):
         st.subheader("Final Summary Cards")
         for summary in st.session_state.get("summary_cards", []):
             render_summary_result_card(summary)
+
+        # Core 5 + 1 Verdicts
+        verdicts = assign_verdicts(summary_outputs)
+
+        st.subheader("Core 5 + 1 Verdicts")
+        verdict_df = pd.DataFrame(verdicts)[["player", "stat_type", "line", "projection", "edge", "score", "verdict"]]
+        st.dataframe(verdict_df.style.highlight_max(axis=0))
 
     else:
         st.warning("Please upload 6 RotoWire prop CSVs for NBA from today’s slate.")
