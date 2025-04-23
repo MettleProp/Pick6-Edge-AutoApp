@@ -9,18 +9,19 @@ def get_initial_10(df):
         "3PM", "Blocks", "Steals"
     ]
 
-    # Ensure "Stat Type" column exists
+    # Ensure "Stat Type" column is present
     if "Stat Type" not in df.columns:
         df["Stat Type"] = ""
 
-    # Drop duplicates on player + stat type
+    # Drop duplicate props by player + stat type
     deduped = df.drop_duplicates(subset=["Player", "Stat Type"])
 
-    # Filter to only valid stat types
+    # Only keep props with desired stat categories
     filtered = deduped[deduped["Stat Type"].isin(valid_stats)]
 
-    # Sort and keep highest edge per player
+    # Pick best prop per player (highest edge)
     sorted_df = filtered.sort_values(by=["Player", "Edge"], ascending=[True, False])
     best_per_player = sorted_df.drop_duplicates(subset=["Player"])
 
-    return best_per_player.reset_index(drop=True)
+    # ✅ Return only the top 10
+    return best_per_player.head(10).reset_index(drop=True)
