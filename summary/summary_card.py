@@ -1,22 +1,37 @@
 import streamlit as st
+from utils.auto_tagger import generate_auto_tags
 
 def render_summary_card(player_name, index, row):
     st.markdown(f"### {index+1}. {player_name}")
 
+    # Auto-generate tags based on row data
+    auto_tags = generate_auto_tags(row)
+
     col1, col2 = st.columns(2)
     with col1:
-        shot1 = st.file_uploader(f"Upload Trend Screenshot for {player_name}", type=["png", "jpg", "jpeg"], key=f"{player_name}_trend")
+        shot1 = st.file_uploader(
+            f"Upload Trend Screenshot for {player_name}",
+            type=["png", "jpg", "jpeg"],
+            key=f"{player_name}_trend"
+        )
     with col2:
-        shot2 = st.file_uploader(f"Upload Notes Screenshot for {player_name}", type=["png", "jpg", "jpeg"], key=f"{player_name}_notes")
+        shot2 = st.file_uploader(
+            f"Upload Notes Screenshot for {player_name}",
+            type=["png", "jpg", "jpeg"],
+            key=f"{player_name}_notes"
+        )
 
     tags = st.multiselect(
-        f"Apply Tags for {player_name}",
-        ["Volatile", "Distorted", "Role Up", "Role Down", "Playoff Motivation"],
+        f"Tags for {player_name}",
+        ["Volatile", "Distorted", "Role Up", "Role Down", "Playoff Motivation", "Streaking", "Line Moved ↑", "Narrow Misses"],
+        default=auto_tags,
         key=f"{player_name}_tags"
     )
 
     override_score = st.slider(
-        f"Confidence Override for {player_name} (Optional)", 1, 10, value=0, key=f"{player_name}_override"
+        f"Confidence Override for {player_name} (Optional)",
+        1, 10, value=0,
+        key=f"{player_name}_override"
     )
 
     return {
