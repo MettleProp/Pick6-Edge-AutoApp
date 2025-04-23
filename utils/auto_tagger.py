@@ -2,24 +2,31 @@
 def generate_auto_tags(row):
     tags = []
 
-    # VOLATILE: if edge is high but projection is close to line
-    if abs(row["Edge"]) > 1.5 and abs(row["RotoWire Projection"] - row["Line"]) < 1.0:
+    # RotoWire mining tags
+    if row.get("Appearances", 0) >= 3:
+        tags.append("Multi-Stat Core")
+
+    if row.get("Has Round Projection"):
+        tags.append("Low Confidence")
+
+    if row.get("Is Close To Line"):
+        tags.append("Projection Trap")
+
+    if row.get("Big Projection Gap"):
+        tags.append("Sharp")
+
+    # Edge-based logic
+    edge = row.get("Edge", 0)
+    if abs(edge) > 1.5 and abs(row["RotoWire Projection"] - row["Line"]) < 1.0:
         tags.append("Volatile")
 
-    # DISTORTED: if projection is far below line
     if row["RotoWire Projection"] < row["Line"] - 1.0:
         tags.append("Distorted")
 
-    # STREAKING: fake it for now — later we use Prop.cash logs
-    if "PTS" in row["Stat Type"] and row["RotoWire Projection"] > row["Line"] + 2:
+    if "PTS" in row.get("Stat Type", "") and row["RotoWire Projection"] > row["Line"] + 2:
         tags.append("Streaking")
 
-    # NARROW MISSES: flag if edge is low but still projected over
-    if 0 < row["Edge"] < 0.7:
+    if 0 < edge < 0.7:
         tags.append("Narrow Misses")
-
-    # LINE SPIKE: manual for now — add auto detection later
-    if row.get("Line Moved", False):
-        tags.append("Line Moved ↑")
 
     return tags

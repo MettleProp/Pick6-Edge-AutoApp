@@ -1,30 +1,30 @@
 import pandas as pd
+from utils.rotowire_miner import mine_rotowire_data
 
-# Mapping RotoWire market names to simplified stat types
-STAT_TYPE_MAP = {
-    "Points": "PTS",
-    "Rebounds": "REB",
-    "Assists": "AST",
-    "Points + Rebounds + Assists": "PRA",
-    "Points + Rebounds": "PR",
-    "Points + Assists": "PA",
-    "Hits+Runs+RBI": "HRRBI",
-    "Total Bases": "TB",
-    "Outs Recorded": "Outs",
-    "Strikeouts": "Strikeouts",
-    "Walks": "Walks",
-    "Earned Runs": "ER"
-}
+def extract_and_normalize_props(files):
+    raw_dataframes = [pd.read_csv(file) for file in files]
 
-def extract_and_normalize_props(uploaded_files):
-    combined = []
-    for file in uploaded_files:
-        df = pd.read_csv(file)
-        if "Market Name" in df.columns:
-            df["Stat Type"] = df["Market Name"].map(STAT_TYPE_MAP)
-        combined.append(df)
+    # MINING: extract player-level metadata before normalization
+    player_metadata = mine_rotowire_data(raw_dataframes)
 
-    all_props = pd.concat(combined, ignore_index=True)
-    all_props = all_props[all_props["Stat Type"].notnull()]  # Drop rows we can’t classify
+    # Combine all props
+    combined_df = pd.concat(raw_dataframes)
+    combined_df = combined_df.drop_duplicates()
 
-    return all_props.reset_index(drop=True)
+    # Standardize column names
+    combined_df = combined_df.rename(columns={
+        "Player Name": "Player",
+        "Stat": "Stat Type",
+        "Proj": "RotoWire Projection"
+    })
+
+    # Merge mined metadata into each row
+    def enrich_row(row):
+        meta = player_metadata.get(row["Player"], {})
+        for key, value in meta.items():
+            row[key] = value
+        return row
+
+    enriched_df = combined_df.apply(enrich_row, axis=1)
+
+    return enriched_df.reset_index(drop=True)
