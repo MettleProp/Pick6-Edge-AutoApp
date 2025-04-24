@@ -58,7 +58,9 @@ def run_nba_pick6(files=None):
 
         # Core 5 + 1 Verdicts
         verdicts = assign_verdicts(summary_outputs)
-
+        st.write("Edge + Tags per Player:")
+        for s in verdicts:
+            st.write(s["player"], "Edge:", s.get("edge"), "Tags:", s.get("tags"), "Score:", s["score"])
         st.subheader("Core 5 + 1 Verdicts")
         verdict_df_raw = pd.DataFrame(verdicts)
         st.write("Verdict Columns:", list(verdict_df_raw.columns))
