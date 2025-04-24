@@ -29,17 +29,23 @@ def run_mlb_pick6(files=None):
         top20 = best_per_player.head(20).reset_index(drop=True)
 
         st.subheader("Top 20 Props (Best per Player, TDBU Scored)")
-        st.dataframe(top20[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]])
+        st.write("Top20 Columns:", list(top20.columns))
+        expected_cols = ["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge", "Confidence Score"]
+        available_cols = [col for col in expected_cols if col in top20.columns]
+        st.dataframe(top20[available_cols])
 
         initial10 = get_initial_10(top20)
 
         st.subheader("Initial 10 Finalists")
+        if initial10.empty:
+            st.warning("Initial 10 is empty. No props passed filters. Try another slate or adjust filters.")
+            return
         st.dataframe(initial10[["Player", "Team", "Stat Type", "Line", "RotoWire Projection", "Edge"]])
 
         st.subheader("Prop.cash Screenshots and Apply Tags")
         summary_outputs = []
         for idx, row in initial10.iterrows():
-            summary = render_summary_card(row["Player"], idx, row)
+            summary = render_summary_card(row["Player"], idx, row, sport="MLB")
             summary["team"] = row["Team"]
             summary_outputs.append(summary)
 
@@ -56,10 +62,9 @@ def run_mlb_pick6(files=None):
         verdict_df_raw = pd.DataFrame(verdicts)
         st.write("Verdict Columns:", list(verdict_df_raw.columns))
 
-        expected_cols = ["player", "stat_type", "line", "projection", "edge", "score", "verdict"]
-        available_cols = [col for col in expected_cols if col in verdict_df_raw.columns]
-
-        verdict_df = verdict_df_raw[available_cols]
+        expected_verdict_cols = ["player", "stat_type", "line", "projection", "edge", "score", "verdict"]
+        available_verdict_cols = [col for col in expected_verdict_cols if col in verdict_df_raw.columns]
+        verdict_df = verdict_df_raw[available_verdict_cols]
         st.dataframe(verdict_df)
 
         # Combo Builder
@@ -67,7 +72,10 @@ def run_mlb_pick6(files=None):
 
         st.subheader("Top 10 Pick2 Combos")
         combo_df = pd.DataFrame(pick2_combos)
-        st.dataframe(combo_df[["Player 1", "Player 2", "Avg Score", "Tags", "Verdict"]])
+        if combo_df.empty or not all(col in combo_df.columns for col in ["Player 1", "Player 2", "Avg Score", "Tags", "Verdict"]):
+            st.warning("No valid Pick2 combos available.")
+        else:
+            st.dataframe(combo_df[["Player 1", "Player 2", "Avg Score", "Tags", "Verdict"]])
 
         st.subheader("Recommended Pick6 Combo")
         st.write("Players:", pick6_entry["Players"])
