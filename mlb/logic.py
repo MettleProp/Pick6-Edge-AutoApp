@@ -28,6 +28,7 @@ def run_mlb_pick6(files=None):
         # MLB ONLY: Cap Fantasy Score to 3, drop if Edge < 3.0
         sorted_df = tdbu_ranked.sort_values(by=["Confidence Score", "Abs Edge"], ascending=False)
         best_per_player = sorted_df.drop_duplicates(subset=["Player"])
+        st.write("Unique Stat Types in Top 20 Pool:", best_per_player["Stat Type"].unique())
 
         fantasy = best_per_player[
             (best_per_player["Stat Type"] == "Fantasy") &
