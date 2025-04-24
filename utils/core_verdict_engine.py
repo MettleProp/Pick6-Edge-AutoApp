@@ -7,20 +7,22 @@ def score_confidence(summary):
     edge = summary.get("edge", 0)
     tags = summary.get("tags", [])
 
-    # Edge-based scoring
+    # Edge-based scoring (now with a bonus tier for very high edge)
     if edge > 1.0:
         score += 1.0
     if edge > 1.5:
         score += 0.5
+    if edge > 2.5:
+        score += 0.5  # ✅ NEW bonus for very strong edge
 
-    # Penalties
+    # Penalties (softened slightly)
     if "Volatile" in tags:
-        score -= 1.0
+        score -= 0.5  # was -1.0
     if "Distorted" in tags:
-        score -= 1.0
+        score -= 0.5  # was -1.0
     if "Narrow Misses" in tags:
         score -= 0.5
-    if "High Variance" in tags:      # ✅ Stronger penalty for Fantasy Score props
+    if "High Variance" in tags:
         score -= 1.0
 
     # Bonuses
@@ -33,14 +35,11 @@ def score_confidence(summary):
 
 
 def assign_verdicts(summaries):
-    # Step 1: Score all summaries
     for s in summaries:
         s["score"] = score_confidence(s)
 
-    # Step 2: Sort by score (desc)
     sorted_summaries = sorted(summaries, key=lambda s: s["score"], reverse=True)
 
-    # Step 3: Assign verdicts
     for i, s in enumerate(sorted_summaries):
         if i < 5:
             s["verdict"] = "Core"
