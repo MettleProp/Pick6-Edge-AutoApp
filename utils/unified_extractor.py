@@ -12,7 +12,7 @@ def extract_and_normalize_props(files):
     combined_df = pd.concat(raw_dataframes)
     combined_df = combined_df.drop_duplicates()
 
-    # Step 3: Rename columns to match your standard system
+    # Step 3: Rename columns to match your system
     combined_df = combined_df.rename(columns={
         "Player Name": "Player",
         "Market Name": "Stat Type",
@@ -20,9 +20,9 @@ def extract_and_normalize_props(files):
         "StatType": "Stat Type",
         "Prop Type": "Stat Type",
         "Category": "Stat Type",
-        "Proj": "RotoWire Projection",
-        "Projection": "RotoWire Projection",
-        "Prediction": "RotoWire Projection"  # ✅ this is the key fix
+        "Proj": "RotoWire Projection",         # ✅ Main projection field
+        "Projection": "RotoWire Projection"    # ✅ Fallback
+        # ❌ Do NOT map "Prediction" – invalid in MLB
     })
 
     # Step 4: Ensure critical columns exist
