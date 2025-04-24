@@ -1,6 +1,4 @@
 
-# utils/auto_enrichment.py
-
 def apply_enrichments(row):
     tags = []
 
@@ -15,8 +13,9 @@ def apply_enrichments(row):
     except:
         pass
 
-    # 2. Lean Agreement Check
-    lean = row.get("Lean", "").strip().lower()
+    # 2. Lean Agreement Check (safely parse lean string)
+    lean_raw = row.get("Lean", "")
+    lean = str(lean_raw).strip().lower() if isinstance(lean_raw, str) else ""
     edge = row.get("Edge", 0)
     if lean == "more" and edge < 0:
         tags.append("Market Disagreement")
