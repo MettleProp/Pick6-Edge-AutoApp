@@ -2,11 +2,10 @@
 import streamlit as st
 from utils.auto_tagger import generate_auto_tags
 
-def render_summary_card(player_name, index, row):
+def render_summary_card(player_name, index, row, sport="NBA"):
     st.markdown(f"### {index+1}. {player_name}")
 
-    # Auto-generate tags from row data
-    auto_tags = generate_auto_tags(row)
+    auto_tags = generate_auto_tags(row, sport)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -22,15 +21,13 @@ def render_summary_card(player_name, index, row):
             key=f"{player_name}_notes"
         )
 
-    # List of all supported tags
     valid_tags = [
         "Volatile", "Distorted", "Role Up", "Role Down", "Playoff Motivation",
         "Streaking", "Line Moved ↑", "Narrow Misses",
         "Multi-Stat Core", "Low Confidence", "Projection Trap", "Sharp",
-        "High Hit Rate", "Cold"
+        "High Hit Rate", "Cold", "High Variance"
     ]
 
-    # Filter auto-tags so only supported values are passed as defaults
     safe_defaults = [tag for tag in auto_tags if tag in valid_tags]
 
     tags = st.multiselect(
