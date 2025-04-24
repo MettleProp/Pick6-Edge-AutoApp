@@ -1,11 +1,15 @@
 
 import streamlit as st
 from utils.auto_tagger import generate_auto_tags
+from utils.auto_enrichment import apply_enrichments
 
 def render_summary_card(player_name, index, row, sport="NBA"):
     st.markdown(f"### {index+1}. {player_name}")
 
+    # Auto-generate tags from core logic
     auto_tags = generate_auto_tags(row, sport)
+    enriched_tags = apply_enrichments(row)
+    combined_tags = list(set(auto_tags + enriched_tags))
 
     col1, col2 = st.columns(2)
     with col1:
@@ -23,12 +27,13 @@ def render_summary_card(player_name, index, row, sport="NBA"):
 
     valid_tags = [
         "Volatile", "Distorted", "Role Up", "Role Down", "Playoff Motivation",
-        "Streaking", "Line Moved ↑", "Narrow Misses",
+        "Streaking", "Line Moved ↑", "Line Moved ↓", "Narrow Misses",
         "Multi-Stat Core", "Low Confidence", "Projection Trap", "Sharp",
-        "High Hit Rate", "Cold", "High Variance"
+        "High Hit Rate", "Cold", "High Variance", "Phantom Line",
+        "Distortion Risk", "Market Disagreement", "Lean Aligned"
     ]
 
-    safe_defaults = [tag for tag in auto_tags if tag in valid_tags]
+    safe_defaults = [tag for tag in combined_tags if tag in valid_tags]
 
     tags = st.multiselect(
         f"Tags for {player_name}",
