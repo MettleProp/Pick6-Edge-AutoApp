@@ -25,8 +25,18 @@ def run_mlb_pick6(files=None):
         scored = calculate_edge(valid)
         tdbu_ranked = compute_tdbu_score(scored, sport="MLB")
 
-        best_per_player = tdbu_ranked.sort_values(by=["Confidence Score", "Abs Edge"], ascending=False).drop_duplicates(subset=["Player"])
-        top20 = best_per_player.head(20).reset_index(drop=True)
+        # MLB ONLY: Cap Fantasy Score to 3, drop if Edge < 3.0
+        sorted_df = tdbu_ranked.sort_values(by=["Confidence Score", "Abs Edge"], ascending=False)
+        best_per_player = sorted_df.drop_duplicates(subset=["Player"])
+
+        fantasy = best_per_player[
+            (best_per_player["Stat Type"] == "Fantasy") &
+            (best_per_player["Edge"] >= 3.0)
+        ]
+        non_fantasy = best_per_player[best_per_player["Stat Type"] != "Fantasy"]
+        capped_fantasy = fantasy.head(3)
+
+        top20 = pd.concat([non_fantasy, capped_fantasy]).head(20).reset_index(drop=True)
 
         st.subheader("Top 20 Props (Best per Player, TDBU Scored)")
         st.write("Top20 Columns:", list(top20.columns))
@@ -60,12 +70,9 @@ def run_mlb_pick6(files=None):
 
         st.subheader("Core 5 + 1 Verdicts")
         verdict_df_raw = pd.DataFrame(verdicts)
-        st.write("Verdict Columns:", list(verdict_df_raw.columns))
-
         expected_verdict_cols = ["player", "stat_type", "line", "projection", "edge", "score", "verdict"]
         available_verdict_cols = [col for col in expected_verdict_cols if col in verdict_df_raw.columns]
-        verdict_df = verdict_df_raw[available_verdict_cols]
-        st.dataframe(verdict_df)
+        st.dataframe(verdict_df_raw[available_verdict_cols])
 
         # Combo Builder
         pick2_combos, pick6_entry = build_combos(verdicts)
