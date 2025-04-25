@@ -1,5 +1,4 @@
 
-# app_pages/slate_result_form.py
 import streamlit as st
 from utils.result_tracker import (
     evaluate_prop_result,
@@ -9,6 +8,8 @@ from utils.result_tracker import (
     export_slate_to_csv
 )
 from datetime import date
+import pandas as pd
+import os
 
 def run():
     st.header("Post-Slate Result Tracker")
@@ -70,3 +71,8 @@ def run():
         st.dataframe(combos)
 
         st.success("Slate logged successfully and added to slate_log_master.csv")
+
+    st.subheader("Download Master Slate Log")
+    if os.path.exists("slate_log_master.csv"):
+        with open("slate_log_master.csv", "rb") as f:
+            st.download_button("Download Full Slate Log CSV", f, file_name="slate_log_master.csv", mime="text/csv")
