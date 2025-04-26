@@ -57,15 +57,19 @@ def render_summary_card(player_name, index, row, sport="NBA"):
         "line": row["Line"],
         "projection": row["RotoWire Projection"],
         "edge": row["Edge"],
-        "row_data": row  # Pass full row forward for projection engine
+        "row_data": row  # Pass full original row forward
     }
 
 def render_summary_result_card(summary):
     st.markdown("---")
     st.markdown(f"### {summary['player']}")
 
+    # Inject final tags into the row before Mettle Projection calculation
+    row_data = summary["row_data"].copy()
+    row_data["tags"] = summary.get("tags", [])
+
     # Compute Mettle Projection and Edge
-    mettle_proj = get_mettle_projection(summary["row_data"])
+    mettle_proj = get_mettle_projection(row_data)
     mettle_edge = round(mettle_proj - summary.get("line", 0), 2)
 
     col1, col2 = st.columns(2)
