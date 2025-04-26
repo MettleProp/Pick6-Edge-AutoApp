@@ -2,11 +2,11 @@
 import streamlit as st
 from utils.auto_tagger import generate_auto_tags
 from utils.auto_enrichment import apply_enrichments
+from utils.mettle_projection import get_mettle_projection
 
 def render_summary_card(player_name, index, row, sport="NBA"):
     st.markdown(f"### {index+1}. {player_name}")
 
-    # Auto-generate tags from core logic
     auto_tags = generate_auto_tags(row, sport)
     enriched_tags = apply_enrichments(row)
     combined_tags = list(set(auto_tags + enriched_tags))
@@ -56,19 +56,25 @@ def render_summary_card(player_name, index, row, sport="NBA"):
         "stat_type": row["Stat Type"],
         "line": row["Line"],
         "projection": row["RotoWire Projection"],
-        "edge": row["Edge"]
+        "edge": row["Edge"],
+        "row_data": row  # Pass full row forward for projection engine
     }
 
 def render_summary_result_card(summary):
     st.markdown("---")
     st.markdown(f"### {summary['player']}")
 
+    # Compute Mettle Projection and Edge
+    mettle_proj = get_mettle_projection(summary["row_data"])
+    mettle_edge = round(mettle_proj - summary.get("line", 0), 2)
+
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"**Stat Type:** {summary.get('stat_type', '—')}")
         st.markdown(f"**Line:** {summary.get('line', '—')}")
-        st.markdown(f"**Projection:** {summary.get('projection', '—')}")
-        st.markdown(f"**Edge:** {summary.get('edge', '—')}")
+        st.markdown(f"**RotoWire Projection:** {summary.get('projection', '—')}")
+        st.markdown(f"**Mettle Projection:** {mettle_proj}")
+        st.markdown(f"**Mettle Edge:** {mettle_edge}")
         st.markdown(f"**Confidence Score:** {summary.get('override', '—') if summary.get('override', 0) > 0 else 'Auto'}")
 
     with col2:
